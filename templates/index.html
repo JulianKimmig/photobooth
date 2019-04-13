@@ -10,7 +10,47 @@
     <div>
         <video id="video" src="http://localhost:8181/stream" type="video/ogg; codecs=theora" autoplay="autoplay"/>
     </div>
-    b
+    <button id="takephoto">take photo</button>
 </div>
+<div id="countdown" style="position: fixed;
+  top: 50%;
+  left: 50%;
+transform: translate(-50%, -50%);
+  font-size: 200px;
+  font-style: italic;
+  font-weight: bold;
+"></div>
 </body>
+<script
+        src="https://code.jquery.com/jquery-3.4.0.min.js"
+        integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg="
+        crossorigin="anonymous"></script>
+
+<script>
+    function countdown(n,finish){
+        if(n<=0){
+            cd.text("");
+            return;
+        }
+        var cd = $('#countdown');
+        cd.animate({"font-size":"2000px",opacity: 0},0);
+        cd.text(n);
+        cd.animate({"font-size":"0px",opacity: 1},1000,"swing",function () {
+            if(n === 1){
+                cd.text("");
+                finish();
+            }else{
+                countdown(n-1,finish)
+            }
+        })
+    }
+    $(function() {
+        $('#takephoto').click(function () {
+            countdown(5,function () {
+                var getUrl = window.location;
+                window.location.href =getUrl .protocol + "//" + getUrl.host + "/takephoto"
+            })
+        })
+    });
+</script>
 </html>
