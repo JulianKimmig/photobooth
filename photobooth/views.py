@@ -45,6 +45,7 @@ def gen(camera):
     while True:
         try:
             frame = camera.get_frame()
+            print("yield",end=" ")
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
         except:
             pass
@@ -196,7 +197,11 @@ class VideoCamera2:
     def get_frame(self):
  #       image = self.frame
         image = self.video.read()
-        ret, jpeg = cv2.imencode(".jpg", image)
+        try:
+            ret, jpeg = cv2.imencode(".jpg", image)
+        except:
+            time.sleep(0.1)
+            return self.get_frame()
         return jpeg.tobytes()
 
     #def update(self):
