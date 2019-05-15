@@ -134,6 +134,7 @@ if USEPICAMERA:
             self.camera.wait_recording(seconds)
             self.camera.stop_recording()
             os.system('MP4Box -add '+filename+'.h264 '+filename+'.mp4')
+            os.system('rm '+filename+'.h264')
 
         def snapshot(self, filename):
             print(filename)
