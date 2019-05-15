@@ -78,7 +78,6 @@ class VideoCamera(object):
     def get_frame(self):
         if USEPICAMERA:
             img = self.stream.getvalue()
-            print(img)
             return img
 
         image = self.frame
