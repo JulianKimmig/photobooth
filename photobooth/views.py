@@ -135,8 +135,9 @@ if USEPICAMERA:
             self.camera.stop_recording()
 
         def snapshot(self, filename):
-            self.camera.capture(filename+'.jpg', use_video_port=True)
-
+            print(filename)
+            self.camera.capture(filename+'.jpg')
+            print(filename)
 else:
     class WebcamVideoStream:
         def __init__(self, src=0):
