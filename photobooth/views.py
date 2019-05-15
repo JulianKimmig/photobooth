@@ -113,9 +113,9 @@ if USEPICAMERA:
             self.stopped = True
 
         def record(self, filename,seconds):
-            self.camera.start_recording('lowres.h264', splitter_port=2)
+            self.camera.start_recording('lowres.h264')
             self.camera.wait_recording(seconds)
-            self.camera.stop_recording(splitter_port=2)
+            self.camera.stop_recording()
 
 else:
     class WebcamVideoStream:

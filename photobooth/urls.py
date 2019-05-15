@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
+    path('index', views.index),
     path('takephoto', views.new_photo),
     path('recordvideo', views.recordvideo),
     path("video_feed", views.video_feed, name="video_feed"),
