@@ -55,8 +55,8 @@ class VideoCamera(object):
             import io
             self.stream = io.BytesIO()
             self.video = picamera.PiCamera()
-            self.video.start_preview()
-            time.sleep(0.1)
+            #self.video.start_preview()
+            #time.sleep(0.1)
         else:
             self.video = cv2.VideoCapture(0)
             (self.grabbed, self.frame) = self.video.read()
@@ -71,7 +71,9 @@ class VideoCamera(object):
 
     def get_frame(self):
         if USEPICAMERA:
-            return self.stream.getvalue()
+            img = self.stream.getvalue()
+            print(img)
+            return img
 
         image = self.frame
         ret, jpeg = cv2.imencode(".jpg", image)
@@ -80,6 +82,7 @@ class VideoCamera(object):
     def update(self):
         while True:
             if USEPICAMERA:
+                self.stream.flush()
                 self.video.capture(self.stream, format='jpeg')
             else:
                 (self.grabbed, self.frame) = self.video.read()
