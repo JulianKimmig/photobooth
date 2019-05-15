@@ -55,6 +55,7 @@ class VideoCamera(object):
             import io
             self.stream = io.BytesIO()
             self.video = picamera.PiCamera()
+            picamera.PiCamera()
             #self.video.start_preview()
             #time.sleep(0.1)
         else:
@@ -65,7 +66,12 @@ class VideoCamera(object):
             threading.Thread(target=self.update, args=()).start()
 
     def __del__(self):
-        self.video.release()
+        if USEPICAMERA:
+            self.stream.flush()
+            self.stream.close()
+            self.video.close()
+        else:
+            self.video.release()
 
 
 
@@ -82,7 +88,7 @@ class VideoCamera(object):
     def update(self):
         while True:
             if USEPICAMERA:
-                self.stream.flush()
+
                 self.video.capture(self.stream, format='jpeg')
             else:
                 (self.grabbed, self.frame) = self.video.read()
