@@ -108,6 +108,7 @@ class VideoCamera(object):
             if USEPICAMERA:
                 with self.stream.condition:
                     self.stream.condition.wait()
+                    print(".",end="")
                     self.frame = self.stream.frame
             else:
                 (self.grabbed, self.frame) = self.video.read()
