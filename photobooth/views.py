@@ -130,13 +130,13 @@ if USEPICAMERA:
             self.stopped = True
 
         def record(self, filename,seconds):
-            self.camera.start_recording(filename+'.h264')
+            self.camera.start_recording(filename+'.h264',use_video_port=True)
             self.camera.wait_recording(seconds)
             self.camera.stop_recording()
 
         def snapshot(self, filename):
             print(filename)
-            self.camera.capture(filename+'.jpg',use_video_port=True, splitter_port=1)
+            self.camera.capture(filename+'.jpg')
             print(filename)
 else:
     class WebcamVideoStream:
