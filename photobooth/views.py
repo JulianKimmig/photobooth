@@ -31,16 +31,16 @@ VIDEOFEED = None
 
 def video_feed(request):
     global VIDEOFEED
-    try:
-        if VIDEOFEED is None:
-            VIDEOFEED = VideoCamera()
-        return StreamingHttpResponse(
-            gen(VIDEOFEED),
-            content_type="multipart/x-mixed-replace;boundary=frame",
-        )
-    except:  # This is bad! replace it with proper handling
+    #try:
+    if VIDEOFEED is None:
+        VIDEOFEED = VideoCamera()
+    return StreamingHttpResponse(
+        gen(VIDEOFEED),
+        content_type="multipart/x-mixed-replace;boundary=frame",
+    )
+ #   except:  # This is bad! replace it with proper handling
         pass
-
+#
 
 
 def gen(camera):
@@ -87,7 +87,6 @@ class VideoCamera(object):
     def update(self):
         while True:
             if USEPICAMERA:
-
                 self.video.capture(self.stream, format='jpeg')
             else:
                 (self.grabbed, self.frame) = self.video.read()
