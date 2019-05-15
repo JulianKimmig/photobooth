@@ -130,7 +130,7 @@ if USEPICAMERA:
             self.stopped = True
 
         def record(self, filename,seconds):
-            self.camera.start_recording(filename+'.h264',use_video_port=True)
+            self.camera.start_recording(filename+'.h264')
             self.camera.wait_recording(seconds)
             self.camera.stop_recording()
 
