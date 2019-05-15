@@ -84,6 +84,35 @@ if USEPICAMERA:
             # if the thread should be stopped
             self.frame = None
             self.stopped = False
+
+        def start(self):
+            # start the thread to read frames from the video stream
+            threading.Thread(target=self.update, args=()).start()
+            return self
+
+        def update(self):
+            # keep looping infinitely until the thread is stopped
+            for f in self.stream:
+                # grab the frame from the stream and clear the stream in
+                # preparation for the next frame
+                self.frame = f.array
+                self.rawCapture.truncate(0)
+
+                # if the thread indicator variable is set, stop the thread
+                # and resource camera resources
+                if self.stopped:
+                    self.stream.close()
+                    self.rawCapture.close()
+                    self.camera.close()
+                    return
+
+        def read(self):
+            # return the frame most recently read
+            return self.frame
+
+        def stop(self):
+            # indicate that the thread should be stopped
+            self.stopped = True
 else:
     class WebcamVideoStream:
         def __init__(self, src=0):
@@ -171,45 +200,45 @@ class VideoCamera2:
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-class VideoCamera(object):
-    def __init__(self, autosave=True):
-        self.autosave = autosave
-        if USEPICAMERA:
-            import io
-            self.stream = StreamingOutput()
-            self.video = picamera.PiCamera()
-            self.video.capture_continuous(self.stream, format='jpeg',resize=(320, 240))
-            #self.video.start_preview()
-            #time.sleep(0.1)
-        else:
-            self.video = cv2.VideoCapture(0)
-            (self.grabbed, self.frame) = self.video.read()
-
-        if self.autosave:
-            threading.Thread(target=self.update, args=()).start()
-
-    def __del__(self):
-        if USEPICAMERA:
-            self.video.stop_recording()
-            self.video.close()
-        else:
-            self.video.release()
-
-
-
-    def get_frame(self):
-        if USEPICAMERA:
-            return self.frame
-
-        image = self.frame
-        ret, jpeg = cv2.imencode(".jpg", image)
-        return jpeg.tobytes()
-
-    def update(self):
-        while True:
-            if USEPICAMERA:
-                with self.stream.condition:
-                    self.stream.condition.wait()
-                    self.frame = self.stream.frame
-            else:
-                (self.grabbed, self.frame) = self.video.read()
+# class VideoCamera(object):
+#     def __init__(self, autosave=True):
+#         self.autosave = autosave
+#         if USEPICAMERA:
+#             import io
+#             self.stream = StreamingOutput()
+#             self.video = picamera.PiCamera()
+#             self.video.capture_continuous(self.stream, format='jpeg',resize=(320, 240))
+#             #self.video.start_preview()
+#             #time.sleep(0.1)
+#         else:
+#             self.video = cv2.VideoCapture(0)
+#             (self.grabbed, self.frame) = self.video.read()
+#
+#         if self.autosave:
+#             threading.Thread(target=self.update, args=()).start()
+#
+#     def __del__(self):
+#         if USEPICAMERA:
+#             self.video.stop_recording()
+#             self.video.close()
+#         else:
+#             self.video.release()
+#
+#
+#
+#     def get_frame(self):
+#         if USEPICAMERA:
+#             return self.frame
+#
+#         image = self.frame
+#         ret, jpeg = cv2.imencode(".jpg", image)
+#         return jpeg.tobytes()
+#
+#     def update(self):
+#         while True:
+#             if USEPICAMERA:
+#                 with self.stream.condition:
+#                     self.stream.condition.wait()
+#                     self.frame = self.stream.frame
+#             else:
+#                 (self.grabbed, self.frame) = self.video.read()
