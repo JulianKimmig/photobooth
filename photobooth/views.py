@@ -27,6 +27,7 @@ def new_photo(request):
 
 def recordvideo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
+    print(request.GET.get("t",10))
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
     os.chdir(tempdir)

@@ -51,7 +51,7 @@ transform: translate(-50%, -50%);
         })
     });
     $(function() {
-        $('#takephoto').click(function () {
+        $('#recordvideo').click(function () {
             countdown(5,function () {
                 var getUrl = window.location;
                 window.location.href =getUrl .protocol + "//" + getUrl.host + "/recordvideo?t="+$("input[name='videoseconds']").val()
