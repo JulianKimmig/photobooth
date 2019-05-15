@@ -1,6 +1,11 @@
 sudo apt update
 sudo apt upgrade
 
+#libs
+echo 'deb [trusted=yes] http://dl.bintray.com/yoursunny/PiZero stretch-backports main' | sudo tee  /etc/apt/sources.list.d/bintray-yoursunny-PiZero.list
+sudo apt update
+sudo apt install python3-opencv
+
 # python, pip
 sudo apt-get install python3 -y
 sudo apt-get install python3-pip -y

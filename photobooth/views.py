@@ -6,7 +6,11 @@ import cv2
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
 
-from photobooth.settings import BASE_DIR
+
+from photobooth.settings import BASE_DIR, USEPICAMERA
+
+if USEPICAMERA:
+    import picamera
 
 
 def index(request):
@@ -47,8 +51,15 @@ def gen(camera):
 class VideoCamera(object):
     def __init__(self, autosave=True):
         self.autosave = autosave
-        self.video = cv2.VideoCapture(0)
-        (self.grabbed, self.frame) = self.video.read()
+        if USEPICAMERA:
+            import io
+            self.stream = io.BytesIO()
+            self.video = picamera.PiCamera()
+            self.video.start_preview()
+            time.sleep(0.1)
+        else:
+            self.video = cv2.VideoCapture(0)
+            (self.grabbed, self.frame) = self.video.read()
 
         if self.autosave:
             threading.Thread(target=self.update, args=()).start()
@@ -59,10 +70,16 @@ class VideoCamera(object):
 
 
     def get_frame(self):
+        if USEPICAMERA:
+            return self.stream.getvalue()
+
         image = self.frame
         ret, jpeg = cv2.imencode(".jpg", image)
         return jpeg.tobytes()
 
     def update(self):
         while True:
-            (self.grabbed, self.frame) = self.video.read()
+            if USEPICAMERA:
+                self.video.capture(self.stream, format='jpeg')
+            else:
+                (self.grabbed, self.frame) = self.video.read()
