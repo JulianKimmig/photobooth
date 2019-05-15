@@ -64,7 +64,9 @@ class StreamingOutput(object):
             # clients it's available
             self.buffer.truncate()
             with self.condition:
-                self.frame = self.buffer.getvalue()
+                frame =  self.buffer.getvalue()
+                if frame is not None:
+                    self.frame = frame
                 self.condition.notify_all()
             self.buffer.seek(0)
         return self.buffer.write(buf)
@@ -108,7 +110,6 @@ class VideoCamera(object):
             if USEPICAMERA:
                 with self.stream.condition:
                     self.stream.condition.wait()
-                    print(".",end="")
                     self.frame = self.stream.frame
             else:
                 (self.grabbed, self.frame) = self.video.read()
