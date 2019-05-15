@@ -1,3 +1,4 @@
+import io
 import os
 import threading
 import time
@@ -48,13 +49,32 @@ def gen(camera):
         frame = camera.get_frame()
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
 
+
+class StreamingOutput(object):
+    def __init__(self):
+        self.frame = None
+        self.buffer = io.BytesIO()
+        self.condition = threading.Condition()
+
+    def write(self, buf):
+        if buf.startswith(b'\xff\xd8'):
+            # New frame, copy the existing buffer's content and notify all
+            # clients it's available
+            self.buffer.truncate()
+            with self.condition:
+                self.frame = self.buffer.getvalue()
+                self.condition.notify_all()
+            self.buffer.seek(0)
+        return self.buffer.write(buf)
+
 class VideoCamera(object):
     def __init__(self, autosave=True):
         self.autosave = autosave
         if USEPICAMERA:
             import io
-            self.stream = io.BytesIO()
+            self.stream = StreamingOutput()
             self.video = picamera.PiCamera()
+            self.video.start_recording(self.stream, format='mjpeg')
             #self.video.start_preview()
             #time.sleep(0.1)
         else:
@@ -66,8 +86,7 @@ class VideoCamera(object):
 
     def __del__(self):
         if USEPICAMERA:
-            self.stream.flush()
-            self.stream.close()
+            self.video.stop_recording()
             self.video.close()
         else:
             self.video.release()
@@ -76,8 +95,7 @@ class VideoCamera(object):
 
     def get_frame(self):
         if USEPICAMERA:
-            img = self.stream.getvalue()
-            return img
+            return self.frame
 
         image = self.frame
         ret, jpeg = cv2.imencode(".jpg", image)
@@ -86,6 +104,8 @@ class VideoCamera(object):
     def update(self):
         while True:
             if USEPICAMERA:
-                self.video.capture(self.stream, format='jpeg')
+                with self.stream.condition:
+                    self.stream.condition.wait()
+                    self.frame = self.stream.frame
             else:
                 (self.grabbed, self.frame) = self.video.read()
