@@ -124,3 +124,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 USEPICAMERA = True
+USEGPHOTO = False

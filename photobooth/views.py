@@ -8,7 +8,7 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import render
 
 
-from photobooth.settings import BASE_DIR, USEPICAMERA
+from photobooth.settings import BASE_DIR, USEPICAMERA,USEGPHOTO
 
 
 def index(request):
@@ -20,10 +20,25 @@ def new_photo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
-    os.chdir(tempdir)
-    os.system("gphoto2 --force-overwrite --capture-image-and-download")
+    if USEGPHOTO:
+        os.chdir(tempdir)
+        os.system("gphoto2 --force-overwrite --capture-image-and-download")
     return render(request, 'index.html')
 
+def recordvideo(request):
+    tempdir=os.path.join(BASE_DIR,"temp")
+    if not os.path.exists(tempdir):
+        os.makedirs(tempdir)
+    os.chdir(tempdir)
+    if USEGPHOTO:
+        os.system("gphoto2 --force-overwrite --capture-image-and-download")
+    else:
+        global VIDEOFEED
+        if VIDEOFEED is None:
+            VIDEOFEED = VideoCamera()
+        VIDEOFEED.record('foo.h264',seconds=request.GET.get("t",10))
+
+    return render(request, 'index.html')
 
 VIDEOFEED = None
 
@@ -95,6 +110,12 @@ if USEPICAMERA:
         def stop(self):
             # indicate that the thread should be stopped
             self.stopped = True
+
+        def record(self, filename,seconds):
+            self.camera.start_recording('lowres.h264', splitter_port=2)
+            self.camera.wait_recording(seconds)
+            self.camera.stop_recording(splitter_port=2)
+
 else:
     class WebcamVideoStream:
         def __init__(self, src=0):
@@ -128,6 +149,9 @@ else:
         def stop(self):
             # indicate that the thread should be stopped
             self.stopped = True
+
+        def record(self, filename,seconds):
+            pass
 
 
 class VideoStream:
@@ -176,3 +200,6 @@ class VideoCamera:
         except:
             return b''
         return jpeg.tobytes()
+
+    def record(self, filename,seconds):
+        self.video.record(filename,seconds)

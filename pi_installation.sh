@@ -29,14 +29,23 @@ echo "/usr/bin/openbox-session">~/.xsession
 nano ~/.bash_profile
 #add
 #if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
-cd  ~/photobooth
-git pull
-#python3 ~/photobooth/manage.py runserver &
+#cd  ~/photobooth
+#git pull
+#python3 ~/photobooth/manage.py runserver 0.0.0.0:8000&
 #startx -- -nocursor
 #fi
+
 sudo raspi-config
    # 3 boot-oprtion
    # autologin to textconsole
 
 
+#picamera support
+sudo nano /boot/config.txt
+
+start_x=1             # essential
+gpu_mem=128           # at least, or maybe more if you wish
+disable_camera_led=0  # optional, if you don't want the led to glow
+
+#dls support
 sudo apt install gphoto2 -y

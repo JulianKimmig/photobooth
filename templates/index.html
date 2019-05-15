@@ -7,10 +7,8 @@
 <body>
 <div>
     <img id="bg" src="{% url 'video_feed' %}">
-    <div>
-        <video id="video" src="http://localhost:8181/stream" type="video/ogg; codecs=theora" autoplay="autoplay"/>
-    </div>
     <button id="takephoto">take photo</button>
+    <button id="recordvideo">record video</button><input type="number" min="1" name="videoseconds">
 </div>
 <div id="countdown" style="position: fixed;
   top: 50%;
@@ -49,6 +47,14 @@ transform: translate(-50%, -50%);
             countdown(5,function () {
                 var getUrl = window.location;
                 window.location.href =getUrl .protocol + "//" + getUrl.host + "/takephoto"
+            })
+        })
+    });
+    $(function() {
+        $('#takephoto').click(function () {
+            countdown(5,function () {
+                var getUrl = window.location;
+                window.location.href =getUrl .protocol + "//" + getUrl.host + "/recordvideo?t="+$("input[name='videoseconds']").val()
             })
         })
     });
