@@ -7,7 +7,7 @@
 </head>
 <body>
 {% for image in images %}
-<img src='{% static image %}' />
+<a  href='{% static image %}' download>{{image}}</a>
 {% endfor %}
 </body>
 </html>
