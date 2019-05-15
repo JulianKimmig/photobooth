@@ -26,7 +26,7 @@ def new_photo(request):
         global VIDEOFEED
         if VIDEOFEED is None:
             VIDEOFEED = VideoCamera()
-        VIDEOFEED.snapshot(str(time.time()),seconds=t)
+        VIDEOFEED.snapshot(str(time.time()))
     return redirect("index")
 
 def recordvideo(request):
