@@ -29,15 +29,15 @@ VIDEOFEED = None
 
 def video_feed(request):
     global VIDEOFEED
-    #try:
-    if VIDEOFEED is None:
-        VIDEOFEED = VideoCamera2()
-    return StreamingHttpResponse(
-        gen(VIDEOFEED),
-        content_type="multipart/x-mixed-replace;boundary=frame",
-    )
- #   except:  # This is bad! replace it with proper handling
- #       pass
+    try:
+        if VIDEOFEED is None:
+            VIDEOFEED = VideoCamera()
+        return StreamingHttpResponse(
+            gen(VIDEOFEED),
+            content_type="multipart/x-mixed-replace;boundary=frame",
+        )
+        except:  # This is bad! replace it with proper handling
+        pass
 #
 
 
@@ -49,25 +49,6 @@ def gen(camera):
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
         except:
             pass
-
-class StreamingOutput(object):
-    def __init__(self):
-        self.frame = None
-        self.buffer = io.BytesIO()
-        self.condition = threading.Condition()
-
-    def write(self, buf):
-        if buf.startswith(b'\xff\xd8'):
-            # New frame, copy the existing buffer's content and notify all
-            # clients it's available
-            self.buffer.truncate()
-            with self.condition:
-                frame =  self.buffer.getvalue()
-                if frame is not None:
-                    self.frame = frame
-                self.condition.notify_all()
-            self.buffer.seek(0)
-        return self.buffer.write(buf)
 
 if USEPICAMERA:
     from picamera.array import PiRGBArray
@@ -180,14 +161,9 @@ class VideoStream:
         # stop the thread and release any resources
         self.stream.stop()
 
-class VideoCamera2:
-    def __init__(self, autosave=True):
-        self.autosave = autosave
+class VideoCamera:
+    def __init__(self):
         self.video = VideoStream(usePiCamera=USEPICAMERA).start()
-       # (self.grabbed, self.frame) = self.video.read()
-
-       # if self.autosave:
-       #     threading.Thread(target=self.update, args=()).start()
 
     def __del__(self):
         self.video.stop()
@@ -200,53 +176,5 @@ class VideoCamera2:
         try:
             ret, jpeg = cv2.imencode(".jpg", image)
         except:
-            time.sleep(0.1)
-            return self.get_frame()
+            pass
         return jpeg.tobytes()
-
-    #def update(self):
-     #   while True:
-     #      self.frame = self.video.read()
-
-# class VideoCamera(object):
-#     def __init__(self, autosave=True):
-#         self.autosave = autosave
-#         if USEPICAMERA:
-#             import io
-#             self.stream = StreamingOutput()
-#             self.video = picamera.PiCamera()
-#             self.video.capture_continuous(self.stream, format='jpeg',resize=(320, 240))
-#             #self.video.start_preview()
-#             #time.sleep(0.1)
-#         else:
-#             self.video = cv2.VideoCapture(0)
-#             (self.grabbed, self.frame) = self.video.read()
-#
-#         if self.autosave:
-#             threading.Thread(target=self.update, args=()).start()
-#
-#     def __del__(self):
-#         if USEPICAMERA:
-#             self.video.stop_recording()
-#             self.video.close()
-#         else:
-#             self.video.release()
-#
-#
-#
-#     def get_frame(self):
-#         if USEPICAMERA:
-#             return self.frame
-#
-#         image = self.frame
-#         ret, jpeg = cv2.imencode(".jpg", image)
-#         return jpeg.tobytes()
-#
-#     def update(self):
-#         while True:
-#             if USEPICAMERA:
-#                 with self.stream.condition:
-#                     self.stream.condition.wait()
-#                     self.frame = self.stream.frame
-#             else:
-#                 (self.grabbed, self.frame) = self.video.read()
