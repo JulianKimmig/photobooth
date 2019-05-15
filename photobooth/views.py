@@ -19,14 +19,15 @@ def new_photo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
+    os.chdir(tempdir)
+
     if USEGPHOTO:
-        os.chdir(tempdir)
         os.system("gphoto2 --force-overwrite --capture-image-and-download")
     else:
         global VIDEOFEED
         if VIDEOFEED is None:
             VIDEOFEED = VideoCamera()
-        VIDEOFEED.snapshot(str(time.time()))
+        VIDEOFEED.snapshot(str(int(time.time())))
     return redirect("index")
 
 def recordvideo(request):
@@ -45,7 +46,7 @@ def recordvideo(request):
         global VIDEOFEED
         if VIDEOFEED is None:
             VIDEOFEED = VideoCamera()
-        VIDEOFEED.record(str(time.time()),seconds=t)
+        VIDEOFEED.record(str(int(time.time())),seconds=t)
 
     return redirect("index")
 
@@ -134,7 +135,7 @@ if USEPICAMERA:
             self.camera.stop_recording()
 
         def snapshot(self, filename):
-            self.camera.capture(filename+'.jpg')
+            self.camera.capture(filename+'.jpg', use_video_port=True)
 
 else:
     class WebcamVideoStream:
