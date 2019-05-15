@@ -131,7 +131,7 @@ else:
 
 
 class VideoStream:
-    def __init__(self, src=0, usePiCamera=False, resolution=(320, 240),
+    def __init__(self, src=0, usePiCamera=False, resolution=(1024,768),
                  framerate=32):
         # check to see if the picamera module should be used
         if usePiCamera:
@@ -170,8 +170,6 @@ class VideoCamera:
 
 
     def get_frame(self):
-        print(".",end="")
- #       image = self.frame
         image = self.video.read()
         try:
             ret, jpeg = cv2.imencode(".jpg", image)
