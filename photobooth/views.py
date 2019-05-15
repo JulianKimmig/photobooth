@@ -10,9 +10,6 @@ from django.shortcuts import render
 
 from photobooth.settings import BASE_DIR, USEPICAMERA
 
-if USEPICAMERA:
-    import picamera
-
 
 def index(request):
     context = {}
@@ -34,7 +31,7 @@ def video_feed(request):
     global VIDEOFEED
     #try:
     if VIDEOFEED is None:
-        VIDEOFEED = VideoCamera()
+        VIDEOFEED = VideoCamera2()
     return StreamingHttpResponse(
         gen(VIDEOFEED),
         content_type="multipart/x-mixed-replace;boundary=frame",
@@ -70,6 +67,109 @@ class StreamingOutput(object):
                 self.condition.notify_all()
             self.buffer.seek(0)
         return self.buffer.write(buf)
+
+if USEPICAMERA:
+    import picamera
+    class PiVideoStream:
+        def __init__(self, resolution=(320, 240), framerate=32):
+            # initialize the camera and stream
+            self.camera = picamera.PiCamera()
+            self.camera.resolution = resolution
+            self.camera.framerate = framerate
+            self.rawCapture = picamera.PiRGBArray(self.camera, size=resolution)
+            self.stream = self.camera.capture_continuous(self.rawCapture,
+                                                         format="bgr", use_video_port=True)
+
+            # initialize the frame and the variable used to indicate
+            # if the thread should be stopped
+            self.frame = None
+            self.stopped = False
+else:
+    class WebcamVideoStream:
+        def __init__(self, src=0):
+            # initialize the video camera stream and read the first frame
+            # from the stream
+            self.stream = cv2.VideoCapture(src)
+            (self.grabbed, self.frame) = self.stream.read()
+
+            # initialize the variable used to indicate if the thread should
+            # be stopped
+            self.stopped = False
+        def start(self):
+            # start the thread to read frames from the video stream
+            threading.Thread(target=self.update, args=()).start()
+            return self
+
+        def update(self):
+            # keep looping infinitely until the thread is stopped
+            while True:
+                # if the thread indicator variable is set, stop the thread
+                if self.stopped:
+                    return
+
+                # otherwise, read the next frame from the stream
+                (self.grabbed, self.frame) = self.stream.read()
+
+        def read(self):
+            # return the frame most recently read
+            return self.frame
+
+        def stop(self):
+            # indicate that the thread should be stopped
+            self.stopped = True
+
+
+class VideoStream:
+    def __init__(self, src=0, usePiCamera=False, resolution=(320, 240),
+                 framerate=32):
+        # check to see if the picamera module should be used
+        if usePiCamera:
+
+            # initialize the picamera stream and allow the camera
+            # sensor to warmup
+            self.stream = PiVideoStream(resolution=resolution,
+                                        framerate=framerate)
+        else:
+            self.stream = WebcamVideoStream(src=src)
+
+    def start(self):
+        # start the threaded video stream
+        return self.stream.start()
+
+    def update(self):
+        # grab the next frame from the stream
+        self.stream.update()
+
+    def read(self):
+        # return the current frame
+        return self.stream.read()
+
+    def stop(self):
+        # stop the thread and release any resources
+        self.stream.stop()
+
+class VideoCamera2:
+    def __init__(self, autosave=True):
+        self.autosave = autosave
+        self.video = VideoStream(usePiCamera=USEPICAMERA).start()
+        (self.grabbed, self.frame) = self.video.read()
+
+        if self.autosave:
+            threading.Thread(target=self.update, args=()).start()
+
+    def __del__(self):
+        self.video.stop()
+
+
+
+    def get_frame(self):
+        image = self.frame
+        ret, jpeg = cv2.imencode(".jpg", image)
+        return jpeg.tobytes()
+
+    def update(self):
+        while True:
+            (self.grabbed, self.frame) = self.video.read()
 
 class VideoCamera(object):
     def __init__(self, autosave=True):
