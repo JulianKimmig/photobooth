@@ -183,10 +183,10 @@ class VideoCamera2:
     def __init__(self, autosave=True):
         self.autosave = autosave
         self.video = VideoStream(usePiCamera=USEPICAMERA).start()
-        (self.grabbed, self.frame) = self.video.read()
+       # (self.grabbed, self.frame) = self.video.read()
 
-        if self.autosave:
-            threading.Thread(target=self.update, args=()).start()
+       # if self.autosave:
+       #     threading.Thread(target=self.update, args=()).start()
 
     def __del__(self):
         self.video.stop()
@@ -194,13 +194,14 @@ class VideoCamera2:
 
 
     def get_frame(self):
-        image = self.frame
+ #       image = self.frame
+        image = self.video.read()
         ret, jpeg = cv2.imencode(".jpg", image)
         return jpeg.tobytes()
 
-    def update(self):
-        while True:
-            (self.grabbed, self.frame) = self.video.read()
+    #def update(self):
+     #   while True:
+     #      self.frame = self.video.read()
 
 # class VideoCamera(object):
 #     def __init__(self, autosave=True):
