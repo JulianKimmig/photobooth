@@ -1,0 +1,14 @@
+{% load satic %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photobooth files</title>
+</head>
+<body>
+{% for img in images %}
+{% for image in images %}
+<img src='{{static image}}' />
+{% endfor %}
+</body>
+</html>

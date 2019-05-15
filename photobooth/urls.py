@@ -25,4 +25,5 @@ urlpatterns = [
     path('takephoto', views.new_photo),
     path('recordvideo', views.recordvideo),
     path("video_feed", views.video_feed, name="video_feed"),
+    path("files", views.file_list, name="file_list"),
 ]

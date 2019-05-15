@@ -123,5 +123,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+tempdir=os.path.join(BASE_DIR,"temp")
+if not os.path.exists(tempdir):
+    os.makedirs(tempdir)
+
+STATICFILES_DIRS = (
+    tempdir,
+)
+
 USEPICAMERA = True
 USEGPHOTO = False

@@ -45,6 +45,14 @@ def recordvideo(request):
 
     return render(request, 'index.html')
 
+
+def file_list(request):
+    tempdir=os.path.join(BASE_DIR,"temp")
+    if not os.path.exists(tempdir):
+        os.makedirs(tempdir)
+    img_list =os.listdir(tempdir)
+    return render(request,'gallery.html', {'images': img_list})
+
 VIDEOFEED = None
 
 def video_feed(request):
@@ -208,3 +216,4 @@ class VideoCamera:
 
     def record(self, filename,seconds):
         self.video.record(filename,seconds)
+
