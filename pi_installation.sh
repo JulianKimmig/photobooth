@@ -24,6 +24,8 @@ echo "/usr/bin/openbox-session">~/.xsession
 nano ~/.bash_profile
 #add
 #if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
+cd  ~/photobooth
+git pull
 #python3 ~/photobooth/manage.py runserver &
 #startx -- -nocursor
 #fi
