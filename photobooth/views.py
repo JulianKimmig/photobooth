@@ -92,7 +92,7 @@ if USEPICAMERA:
             self.camera.resolution = resolution
             self.camera.framerate = framerate
             self.rawCapture = PiRGBArray(self.camera, size=resolution)
-            self.stream = self.camera.start_recording(self.rawCapture,
+            self.stream = self.camera.capture_continuous(self.rawCapture,
                                                          format="bgr", use_video_port=True)
 
             # initialize the frame and the variable used to indicate
@@ -136,7 +136,7 @@ if USEPICAMERA:
 
         def snapshot(self, filename):
             print(filename)
-            self.camera.capture(filename+'.jpg')
+            self.camera.capture(filename+'.jpg',use_video_port=True, splitter_port=1)
             print(filename)
 else:
     class WebcamVideoStream:
