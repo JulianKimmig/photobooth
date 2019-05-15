@@ -36,9 +36,9 @@ def video_feed(request):
             gen(VIDEOFEED),
             content_type="multipart/x-mixed-replace;boundary=frame",
         )
-        except:  # This is bad! replace it with proper handling
+    except:
         pass
-#
+
 
 
 def gen(camera):
