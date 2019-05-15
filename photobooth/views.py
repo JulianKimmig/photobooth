@@ -44,9 +44,7 @@ def video_feed(request):
 def gen(camera):
     while True:
         try:
-            frame = camera.get_frame()
-            print("yield",end=" ")
-            yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
+            yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + camera.get_frame() + b"\r\n\r\n")
         except:
             pass
 
@@ -164,6 +162,7 @@ class VideoStream:
 class VideoCamera:
     def __init__(self):
         self.video = VideoStream(usePiCamera=USEPICAMERA).start()
+        time.sleep(2)
 
     def __del__(self):
         self.video.stop()
@@ -171,10 +170,11 @@ class VideoCamera:
 
 
     def get_frame(self):
+        print(".",end="")
  #       image = self.frame
         image = self.video.read()
         try:
             ret, jpeg = cv2.imencode(".jpg", image)
         except:
-            pass
+            return b''
         return jpeg.tobytes()
