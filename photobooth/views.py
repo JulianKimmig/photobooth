@@ -55,7 +55,6 @@ class VideoCamera(object):
             import io
             self.stream = io.BytesIO()
             self.video = picamera.PiCamera()
-            picamera.PiCamera()
             #self.video.start_preview()
             #time.sleep(0.1)
         else:
