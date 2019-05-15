@@ -69,14 +69,16 @@ class StreamingOutput(object):
         return self.buffer.write(buf)
 
 if USEPICAMERA:
-    import picamera
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+
     class PiVideoStream:
         def __init__(self, resolution=(320, 240), framerate=32):
             # initialize the camera and stream
-            self.camera = picamera.PiCamera()
+            self.camera = PiCamera()
             self.camera.resolution = resolution
             self.camera.framerate = framerate
-            self.rawCapture = picamera.PiRGBArray(self.camera, size=resolution)
+            self.rawCapture = PiRGBArray(self.camera, size=resolution)
             self.stream = self.camera.capture_continuous(self.rawCapture,
                                                          format="bgr", use_video_port=True)
 
