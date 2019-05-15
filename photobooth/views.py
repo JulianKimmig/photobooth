@@ -39,7 +39,7 @@ def video_feed(request):
         content_type="multipart/x-mixed-replace;boundary=frame",
     )
  #   except:  # This is bad! replace it with proper handling
-        pass
+ #       pass
 #
 
 
