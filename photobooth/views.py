@@ -78,7 +78,7 @@ class VideoCamera(object):
             import io
             self.stream = StreamingOutput()
             self.video = picamera.PiCamera()
-            self.video.start_recording(self.stream, format='mjpeg',resize=(320, 240))
+            self.video.capture_continuous(self.stream, format='jpeg',resize=(320, 240))
             #self.video.start_preview()
             #time.sleep(0.1)
         else:
