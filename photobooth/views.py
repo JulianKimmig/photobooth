@@ -2,6 +2,7 @@ import io
 import os
 import threading
 import time
+from subprocess import call
 
 import cv2
 from django.http import StreamingHttpResponse
@@ -133,6 +134,7 @@ if USEPICAMERA:
             self.camera.start_recording(filename+'.h264')
             self.camera.wait_recording(seconds)
             self.camera.stop_recording()
+            call('MP4Box -add '+filename+'.h264 '+filename+'.mp4')
 
         def snapshot(self, filename):
             print(filename)
