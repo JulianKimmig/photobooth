@@ -27,7 +27,11 @@ def new_photo(request):
 
 def recordvideo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
-    print(request.GET.get("t",10))
+    t = 10
+    try:
+        t = int(request.GET.get("t",t))
+    except:pass
+
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
     os.chdir(tempdir)
@@ -37,7 +41,7 @@ def recordvideo(request):
         global VIDEOFEED
         if VIDEOFEED is None:
             VIDEOFEED = VideoCamera()
-        VIDEOFEED.record('foo.h264',seconds=request.GET.get("t",10))
+        VIDEOFEED.record('foo.h264',seconds=t)
 
     return render(request, 'index.html')
 
