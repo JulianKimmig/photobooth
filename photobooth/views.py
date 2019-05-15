@@ -5,8 +5,7 @@ import time
 
 import cv2
 from django.http import StreamingHttpResponse
-from django.shortcuts import render
-
+from django.shortcuts import render, redirect
 
 from photobooth.settings import BASE_DIR, USEPICAMERA,USEGPHOTO
 
@@ -23,7 +22,12 @@ def new_photo(request):
     if USEGPHOTO:
         os.chdir(tempdir)
         os.system("gphoto2 --force-overwrite --capture-image-and-download")
-    return render(request, 'index.html')
+    else:
+        global VIDEOFEED
+        if VIDEOFEED is None:
+            VIDEOFEED = VideoCamera()
+        VIDEOFEED.snapshot(str(time.time()),seconds=t)
+    return redirect("index")
 
 def recordvideo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
@@ -41,9 +45,9 @@ def recordvideo(request):
         global VIDEOFEED
         if VIDEOFEED is None:
             VIDEOFEED = VideoCamera()
-        VIDEOFEED.record('foo.h264',seconds=t)
+        VIDEOFEED.record(str(time.time()),seconds=t)
 
-    return render(request, 'index.html')
+    return redirect("index")
 
 
 def file_list(request):
@@ -125,9 +129,12 @@ if USEPICAMERA:
             self.stopped = True
 
         def record(self, filename,seconds):
-            self.camera.start_recording('lowres.h264')
+            self.camera.start_recording(filename+'.h264')
             self.camera.wait_recording(seconds)
             self.camera.stop_recording()
+
+        def snapshot(self, filename):
+            self.camera.capture(filename+'.jpg')
 
 else:
     class WebcamVideoStream:
@@ -164,6 +171,9 @@ else:
             self.stopped = True
 
         def record(self, filename,seconds):
+            pass
+
+        def snapshot(self, filename):
             pass
 
 
@@ -217,3 +227,5 @@ class VideoCamera:
     def record(self, filename,seconds):
         self.video.record(filename,seconds)
 
+    def snapshot(self, filename):
+        self.video.snapshot(filename)
