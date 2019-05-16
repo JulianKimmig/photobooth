@@ -89,16 +89,18 @@ if USEPICAMERA:
         def __init__(self, resolution=(320, 240), framerate=32):
             # initialize the camera and stream
             self.camera = PiCamera()
-            self.camera.resolution = resolution
+            print(self.camera.MAX_RESOLUTION)
+            self.camera.resolution = self.camera.MAX_RESOLUTION
             self.camera.framerate = framerate
             self.rawCapture = PiRGBArray(self.camera, size=resolution)
             self.stream = self.camera.capture_continuous(self.rawCapture,
-                                                         format="bgr", use_video_port=True)
+                                                         format="bgr", use_video_port=True,resize=resolution)
 
             # initialize the frame and the variable used to indicate
             # if the thread should be stopped
             self.frame = None
             self.stopped = False
+            
 
         def start(self):
             # start the thread to read frames from the video stream
@@ -120,7 +122,7 @@ if USEPICAMERA:
                     self.rawCapture.close()
                     self.camera.close()
                     return
-
+	
         def read(self):
             # return the frame most recently read
             return self.frame
@@ -137,9 +139,7 @@ if USEPICAMERA:
             os.system('rm '+filename+'.h264')
 
         def snapshot(self, filename):
-            print(filename)
             self.camera.capture(filename+'.jpg')
-            print(filename)
 else:
     class WebcamVideoStream:
         def __init__(self, src=0):
@@ -182,7 +182,7 @@ else:
 
 
 class VideoStream:
-    def __init__(self, src=0, usePiCamera=False, resolution=(1024,768),
+    def __init__(self, src=0, usePiCamera=False, resolution=(1280,720),
                  framerate=32):
         # check to see if the picamera module should be used
         if usePiCamera:
