@@ -34,20 +34,20 @@ def display(im, decodedObjects):
     # Loop over all decoded objects
     for decodedObject in decodedObjects:
         points = decodedObject.polygon
-
+        print(points)
         # If the points do not form a quad, find convex hull
         if len(points) > 4 :
             hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
             hull = list(map(tuple, np.squeeze(hull)))
         else :
-            hull = points;
+            hull = points
 
         # Number of points in the convex hull
         n = len(hull)
 
         # Draw the convext hull
-        for j in range(0,n):
-            cv2.line(im, hull[j], hull[ (j+1) % n], (255,0,0),)
+        #for j in range(0,n):
+        #    cv2.line(im, hull[j], hull[ (j+1) % n], (255,0,0),)
         return im
 
 def qr_code_command_parser(image):
