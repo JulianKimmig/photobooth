@@ -15,6 +15,11 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+def qr_code_command_parser(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image
+
+
 def new_photo(request):
     tempdir=os.path.join(BASE_DIR,"temp")
     if not os.path.exists(tempdir):
@@ -26,7 +31,7 @@ def new_photo(request):
     else:
         global VIDEOFEED
         if VIDEOFEED is None:
-            VIDEOFEED = VideoCamera()
+            VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
         VIDEOFEED.snapshot(str(int(time.time())))
     return redirect("index")
 
@@ -45,7 +50,7 @@ def recordvideo(request):
     else:
         global VIDEOFEED
         if VIDEOFEED is None:
-            VIDEOFEED = VideoCamera()
+            VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
         VIDEOFEED.record(str(int(time.time())),seconds=t)
 
     return redirect("index")
@@ -64,7 +69,7 @@ def video_feed(request):
     global VIDEOFEED
     try:
         if VIDEOFEED is None:
-            VIDEOFEED = VideoCamera()
+            VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
         return StreamingHttpResponse(
             gen(VIDEOFEED),
             content_type="multipart/x-mixed-replace;boundary=frame",
@@ -211,9 +216,11 @@ class VideoStream:
         self.stream.stop()
 
 class VideoCamera:
-    def __init__(self):
+    def __init__(self,imageprocessor=None):
+        self.imageprocessor = imageprocessor
         self.video = VideoStream(usePiCamera=USEPICAMERA).start()
         time.sleep(2)
+
 
     def __del__(self):
         self.video.stop()
@@ -222,6 +229,8 @@ class VideoCamera:
 
     def get_frame(self):
         image = self.video.read()
+        if self.imageprocessor is not None:
+            image = self.imageprocessor(image)
         try:
             ret, jpeg = cv2.imencode(".jpg", image)
         except:
