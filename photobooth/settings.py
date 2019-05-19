@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'photobooth_app.apps.PhotoboothAppConfig',
 ]
 
 MIDDLEWARE = [
@@ -124,14 +125,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
-tempdir=os.path.join(BASE_DIR,"temp")
-if not os.path.exists(tempdir):
-    os.makedirs(tempdir)
-
 STATICFILES_DIRS = (
-    tempdir,
+    os.path.join(BASE_DIR,"static"),
 )
+
+TEMPDIR=os.path.join(STATICFILES_DIRS[0],"temp")
+if not os.path.exists(TEMPDIR):
+    os.makedirs(TEMPDIR)
+
+
 
 USEPICAMERA = True
 USEGPHOTO = False
+ALLOW_PRINTING = False
+SHOWBUTTONS=False

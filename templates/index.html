@@ -1,14 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Photobooth</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 <body>
-<div>
-    <img id="bg" src="{% url 'video_feed' %}">
-    <button id="takephoto">take photo</button>
-    <button id="recordvideo">record video</button><input type="number" min="1" name="videoseconds" value="10">
+<div style="height:100vh;width:100%;
+        text-align: center;
+        background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('{% url 'photobooth_app:video_feed' %}');">
+    <div style="position:absolute;bottom: 20px;left: 50%;transform: translate(-50%,0);
+            {% if not showbuttons %}
+                display: none;
+            {% endif %}
+">
+        <button id="takephoto">take photo</button>
+        <button id="recordvideo">record video</button><input type="number" min="1" name="videoseconds" value="10">
+        </div>
+
 </div>
 <div id="countdown" style="position: fixed;
   top: 50%;
@@ -58,5 +73,23 @@ transform: translate(-50%, -50%);
             })
         })
     });
+
+
+    var ajax_call = function() {
+        var getUrl = window.location;
+        $.getJSON(getUrl .protocol + "//" + getUrl.host + "/commands",function (data) {
+            for(let i=0;i<data.opencommands.length;i++){
+                console.log(data)
+                if(data.opencommands[i] === "Photo"){
+                    $('#takephoto').click();
+                    clearInterval(commandrequester);
+                }
+            }
+        })
+    };
+
+    var interval = 500; // where X is your every X minutes
+
+    var commandrequester = setInterval(ajax_call, interval);
 </script>
 </html>
