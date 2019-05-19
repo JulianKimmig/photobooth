@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load static %}
+{% static "" as baseUrl %}
+{% block content %}
+    <div id="image" ><img height="100%" width="100%" src="{% static ""%}{{ static_image }}"></div>
+{% endblock %}
