@@ -10,13 +10,50 @@ from django.shortcuts import render, redirect
 from photobooth.settings import BASE_DIR, USEPICAMERA,USEGPHOTO
 
 
+import pyzbar.pyzbar as pyzbar
+import numpy as np
+
 def index(request):
     context = {}
     return render(request, 'index.html', context)
 
 
+def decode(im) :
+    # Find barcodes and QR codes
+    decodedObjects = pyzbar.decode(im)
+
+    # Print results
+    for obj in decodedObjects:
+        print('Type : ', obj.type)
+        print('Data : ', obj.data,'\n')
+
+    return decodedObjects
+
+def display(im, decodedObjects):
+
+    # Loop over all decoded objects
+    for decodedObject in decodedObjects:
+        points = decodedObject.polygon
+
+        # If the points do not form a quad, find convex hull
+        if len(points) > 4 :
+            hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
+            hull = list(map(tuple, np.squeeze(hull)))
+        else :
+            hull = points;
+
+        # Number of points in the convex hull
+        n = len(hull)
+
+        # Draw the convext hull
+        for j in range(0,n):
+            cv2.line(im, hull[j], hull[ (j+1) % n], (255,0,0),)
+        return im
+
 def qr_code_command_parser(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    decodedObjects = decode(image)
+    image = display(image, decodedObjects)
     return image
 
 
