@@ -131,11 +131,32 @@ class PostProduction(View):
             response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
             return response
 
+        if not os.path.exists(media.media):
+            media.delete()
+            response =  redirect('photobooth_app:index')
+            response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+            return response
+
         path = os.path.relpath(media.media,STATICFILES_DIRS[0])
         return render(request,'postproduction.html', {'image_path': path,'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)})
 
     def post(self,request,id):
-        media = Media.objects.get(id=id)
+        try:
+            media = Media.objects.get(id=id)
+        except:
+            media = None
+
+        if media is None:
+            response =  redirect('photobooth_app:index')
+            response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+            return response
+
+        if not os.path.exists(media.media):
+            media.delete()
+            response =  redirect('photobooth_app:index')
+            response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+            return response
+
         action = request.POST.get('action',)
         if action == 'save':
             newdir = os.path.join(STATICFILES_DIRS[0],"media",os.path.basename(media.media))
