@@ -25,6 +25,7 @@ echo "sleep 5s && midori  --inactivity-reset=300 -e Fullscreen -a 'http://localh
 
 echo "/usr/bin/openbox-session">~/.xsession
 echo "while [ \$(nc -w 1 localhost 8000 </dev/null; echo \$?) -gt 0 ];do echo 'wait for server to start';sleep 2;done;startx -- -nocursor" > ~/start_screen.sh
+chmod +x ~/start_screen.sh
 
 echo "if [[ -z \$DISPLAY ]] && [[ \$(tty) = /dev/tty1 ]]; then cd ~/photobooth;sleep 5; git pull; python3 ~/photobooth/manage.py runserver 0.0.0.0:8000& sleep 5;  ~/start_screen.sh& fi" > ~/.bash_profile
 #sudo raspi-config
@@ -39,4 +40,7 @@ echo "if [[ -z \$DISPLAY ]] && [[ \$(tty) = /dev/tty1 ]]; then cd ~/photobooth;s
 #disable_camera_led=0  # optional, if you don't want the led to glow
 
 #dls support
-sudo apt install gphoto2 -y
+sudo apt install libcblas-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test gphoto2 libzbar0 -y
+
+sudo usermod -a -G tty pi
+sudo apt-get install xserver-xorg-legacy

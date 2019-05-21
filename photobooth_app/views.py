@@ -5,6 +5,7 @@ import numpy as np
 import os
 
 import shutil
+import subprocess
 from django.http import StreamingHttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
@@ -55,7 +56,9 @@ def new_photo(request):
     filename = str(int(time.time()))
     if USEGPHOTO:
         filename=filename+".jpg"
-        os.system("gphoto2 --force-overwrite --capture-image-and-download --filename \""+filename+"\"")
+        p = subprocess.Popen(('gphoto2','--force-overwrite', '--capture-image-and-download' ,'--filename',filename))
+        p.wait()
+#        os.system("gphoto2 --force-overwrite --capture-image-and-download --filename \""+filename+"\"")
     else:
         global VIDEOFEED
         if VIDEOFEED is None:
