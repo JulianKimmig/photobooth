@@ -23,7 +23,7 @@ def index(request):
     global VIDEOFEED
     if VIDEOFEED is None:
         VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
-    context = {'showbuttons':SHOWBUTTONS}
+    context = {'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)}
     VIDEOFEED.allowed_qr_commands=['Photo']
     return render(request, 'index.html', context)
 
@@ -54,7 +54,8 @@ def new_photo(request):
     os.chdir(TEMPDIR)
     filename = str(int(time.time()))
     if USEGPHOTO:
-        os.system("gphoto2 --force-overwrite --capture-image-and-download")
+        filename=filename+".jpg"
+        os.system("gphoto2 --force-overwrite --capture-image-and-download --filename \""+filename+"\"")
     else:
         global VIDEOFEED
         if VIDEOFEED is None:
@@ -62,7 +63,11 @@ def new_photo(request):
         filename = VIDEOFEED.snapshot(filename)
 
     photo = Photo.objects.create(media=os.path.join(TEMPDIR,filename))
-    return redirect("photobooth_app:postproduction",id = photo.id)
+
+    response = redirect("photobooth_app:postproduction",id = photo.id)
+    print(request.GET)
+    response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+    return response
 
 def recordvideo(request):
     t = 10
@@ -75,7 +80,9 @@ def recordvideo(request):
             VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
         VIDEOFEED.record(str(int(time.time())),seconds=t)
 
-    return redirect("photobooth_app:index")
+    response =  redirect('photobooth_app:index')
+    response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+    return response
 
 def file_list(request):
     img_list =os.listdir(TEMPDIR)
@@ -115,12 +122,17 @@ class PostProduction(View):
         if ALLOW_PRINTING:
             VIDEOFEED.allowed_qr_commands.append("Print")
 
-        media = Media.objects.get(id=id)
+        try:
+           media = Media.objects.get(id=id)
+        except:
+            media = None
         if media is None:
-            return redirect("photobooth_app:index")
+            response =  redirect('photobooth_app:index')
+            response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+            return response
 
         path = os.path.relpath(media.media,STATICFILES_DIRS[0])
-        return render(request,'postproduction.html', {'image_path': path,'showbuttons':SHOWBUTTONS})
+        return render(request,'postproduction.html', {'image_path': path,'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)})
 
     def post(self,request,id):
         media = Media.objects.get(id=id)
@@ -134,4 +146,6 @@ class PostProduction(View):
             os.remove(media.media)
             media.delete()
 
-        return redirect('photobooth_app:index')
+        response =  redirect('photobooth_app:index')
+        response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+        return response

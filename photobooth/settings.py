@@ -136,6 +136,19 @@ if not os.path.exists(TEMPDIR):
 
 
 USEPICAMERA = True
-USEGPHOTO = False
+if USEPICAMERA:
+    try:
+        from picamera import PiCamera
+    except:
+        USEPICAMERA = False
+USEGPHOTO = True
+if USEGPHOTO:
+    try:
+        from shutil import which
+        if which("gphoto2") is None:
+            USEGPHOTO = False
+    except:
+        USEGPHOTO = False
+
 ALLOW_PRINTING = False
 SHOWBUTTONS=False
