@@ -1,0 +1,7 @@
+{
+    "settings": {
+        "server": {
+            "allowed_hosts": [],
+        }
+    }
+}

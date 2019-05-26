@@ -15,8 +15,15 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import random
 from json_dict import JsonDict
+from shutil import copyfile
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    if not os.path.exists(os.path.join(BASE_DIR,"config.json")):
+        copyfile(os.path.join(BASE_DIR,"config_basic.json"), os.path.join(BASE_DIR,"config.json"))
+except:pass
+
 JCONFIG = JsonDict(os.path.join(BASE_DIR,"config.json"))
 
 # Quick-start development settings - unsuitable for production
@@ -140,13 +147,16 @@ if USEPICAMERA:
     try:
         from picamera import PiCamera
     except:
+        print("CANNOT INITALIZE PICAMER")
         USEPICAMERA = False
 USEGPHOTO = True
 if USEGPHOTO:
     try:
         from shutil import which
+
         if which("gphoto2") is None:
             USEGPHOTO = False
+            print("GPHOTO2 NOT FOUND")
     except:
         USEGPHOTO = False
 
