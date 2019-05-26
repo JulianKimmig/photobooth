@@ -147,6 +147,7 @@ class VideoCamera:
         threading.Thread(target=self.run_qr_parser).start()
         self.allowed_qr_commands=[]
         self.pending_qr_commands=[]
+        self.decodedObjects = []
         time.sleep(2)
 
 
@@ -156,19 +157,20 @@ class VideoCamera:
 
     def run_qr_parser(self):
         while True:
-            image = self.video.read()
-            self.decodedObjects = pyzbar.decode(image, symbols=[ZBarSymbol.QRCODE])
+            try:
+                image = self.video.read()
+                self.decodedObjects = pyzbar.decode(image, symbols=[ZBarSymbol.QRCODE])
 
-            # Print results
-            for obj in self.decodedObjects:
-                command= obj.data.decode('ASCII')
-                if command in self.allowed_qr_commands:
-                    print(command)
-                    self.pending_qr_commands.append(command)
-                    self.pending_qr_commands = list(set(self.pending_qr_commands))
-                else:
-                    print(command)
-            time.sleep(0.1)
+                # Print results
+                for obj in self.decodedObjects:
+                    command= obj.data.decode('ASCII')
+                    if command in self.allowed_qr_commands:
+                        print(command)
+                        self.pending_qr_commands.append(command)
+                        self.pending_qr_commands = list(set(self.pending_qr_commands))
+                    else:
+                        print(command)
+            except:pass
 
 
     def get_frame(self):
