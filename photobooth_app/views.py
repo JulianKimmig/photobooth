@@ -52,10 +52,12 @@ ACTIVE_FILTERS=[]
 Filter = namedtuple('Filter',['name','matrix'])
 
 
-SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[ 0.393, 0.769, 0.189],
+SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[0.272, 0.534, 0.131],
                                             [ 0.349, 0.686, 0.168],
-                                            [ 0.272, 0.534, 0.131]
+                                            [ 0.393, 0.769, 0.189]
                                             ]))
+
+
 if "sepia" in JCONFIG.get("settings","photobooth","filters",default=[]):
     ACTIVE_FILTERS.append(SEPIA_FILTER)
 
