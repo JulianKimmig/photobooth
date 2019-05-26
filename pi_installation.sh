@@ -28,3 +28,8 @@ chmod +x ~/start_screen.sh
 sudo usermod -a -G tty pi
 
 echo -e "start_x=1\ngpu_mem=512\ndisable_camera_led=1" | sudo tee -a /boot/config.txt
+
+#printer
+sudo apt-get install cups -y
+
+sudo apt-get install python3-cups -y

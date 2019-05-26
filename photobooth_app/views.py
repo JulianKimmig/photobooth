@@ -11,11 +11,13 @@ from django.http import StreamingHttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 
-
 from photobooth.settings import USEGPHOTO, TEMPDIR, STATICFILES_DIRS, ALLOW_PRINTING, SHOWBUTTONS, MARK_QR_CODES, \
     JCONFIG
 from photobooth_app.models import Photo, Media
 from photobooth_app.videocamera import VideoCamera
+
+if ALLOW_PRINTING:
+    import cups
 
 VIDEOFEED = None
 
@@ -27,7 +29,7 @@ def index(request):
     if VIDEOFEED is None:
         VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
     context = {'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)}
-    VIDEOFEED.allowed_qr_commands=['Photo']
+    VIDEOFEED.allowed_qr_commands=['photo']
     return render(request, 'index.html', context)
 
 def display(im, decodedObjects):
@@ -49,13 +51,13 @@ def display(im, decodedObjects):
     return im
 
 ACTIVE_FILTERS=[]
-Filter = namedtuple('Filter',['name','matrix'])
+Filter = namedtuple('Filter',['name','matrix','alpha'])
 
 
 SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[0.272, 0.534, 0.131],
                                             [ 0.349, 0.686, 0.168],
                                             [ 0.393, 0.769, 0.189]
-                                            ]))
+                                            ]),alpha=0.3)
 
 
 if "sepia" in JCONFIG.get("settings","photobooth","filters",default=[]):
@@ -66,7 +68,8 @@ def qr_code_command_parser(image):
         image = display(image, VIDEOFEED.decodedObjects)
 
     for filter in ACTIVE_FILTERS:
-        image = cv2.transform( image, filter.matrix )
+        overlay = cv2.transform( image, filter.matrix )
+        image = cv2.addWeighted(overlay, filter.alpha, image, 1 - filter.alpha,0)
     return image
 
 
@@ -84,10 +87,18 @@ def new_photo(request):
             VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
         filename = VIDEOFEED.snapshot(filename)
 
-    photo = Photo.objects.create(media=os.path.join(TEMPDIR,filename))
-
+    media_file=os.path.join(TEMPDIR,filename)
+    photo = Photo.objects.create(media=media_file,edited_media=media_file)
+    if len(ACTIVE_FILTERS)>0:
+        photo.edited_media = os.path.splitext(photo.media)[0]+"_filtered_"+os.path.splitext(photo.media)[1]
+        photo.save()
+        shutil.copyfile(photo.media,photo.edited_media)
+        image = cv2.imread(photo.edited_media)
+        for filter in ACTIVE_FILTERS:
+            overlay = cv2.transform( image, filter.matrix )
+            image = cv2.addWeighted(overlay, filter.alpha, image, 1 - filter.alpha,0)
+        cv2.imwrite(photo.edited_media,image)
     response = redirect("photobooth_app:postproduction",id = photo.id)
-    print(request.GET)
     response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
     return response
 
@@ -140,9 +151,9 @@ class PostProduction(View):
             VIDEOFEED = VideoCamera(imageprocessor=qr_code_command_parser)
 
         VIDEOFEED.pending_qr_commands = []
-        VIDEOFEED.allowed_qr_commands=['Delete',"Save",]
+        VIDEOFEED.allowed_qr_commands=['delete',"save",]
         if ALLOW_PRINTING:
-            VIDEOFEED.allowed_qr_commands.append("Print")
+            VIDEOFEED.allowed_qr_commands.append("print")
 
         try:
            media = Media.objects.get(id=id)
@@ -159,7 +170,7 @@ class PostProduction(View):
             response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
             return response
 
-        path = os.path.relpath(media.media,STATICFILES_DIRS[0])
+        path = os.path.relpath(media.edited_media,STATICFILES_DIRS[0])
         return render(request,'postproduction.html', {'image_path': path,'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)})
 
     def post(self,request,id):
@@ -180,13 +191,30 @@ class PostProduction(View):
             return response
 
         action = request.POST.get('action',)
-        if action == 'save':
+        if action == 'save' or action == 'print':
             newdir = os.path.join(STATICFILES_DIRS[0],"media",os.path.basename(media.media))
             shutil.move(media.media,newdir)
             media.media = newdir
+
+            newdir = os.path.join(STATICFILES_DIRS[0],"media",os.path.basename(media.edited_media))
+            shutil.move(media.edited_media,newdir)
+            media.edited_media = newdir
+
             media.save()
-        elif action == 'delete':
-            os.remove(media.media)
+
+        if action == 'print':
+            conn = cups.Connection()
+            printers = conn.getPrinters ()
+            if len(printers)>0:
+                printer_name=printers.keys()[0]
+                conn.printFile (printer_name, media.edited_media, "Photobooth Image", {})
+
+
+        if action == 'delete':
+            try:os.remove(media.media)
+            except:pass
+            try:os.remove(media.edited_media)
+            except:pass
             media.delete()
 
         response =  redirect('photobooth_app:index')
