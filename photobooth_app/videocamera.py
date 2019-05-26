@@ -171,6 +171,7 @@ class VideoCamera:
                     else:
                         print(command)
             except:pass
+            time.sleep(0.1)
 
 
     def get_frame(self):
