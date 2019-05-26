@@ -63,9 +63,21 @@ SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[0.272, 0.534, 0.131],
 if "sepia" in JCONFIG.get("settings","photobooth","filters",default=[]):
     ACTIVE_FILTERS.append(SEPIA_FILTER)
 
+def cropimage(image,ratio=3.0625/3.125):
+    height = int(min(image.shape[0],image.shape[1]/ratio))
+    width = int(min(image.shape[1],height*ratio))
+
+    x1=int((image.shape[1]-width)/2)
+    x2=int(image.shape[1]-x1)
+    y1=int((image.shape[0]-height)/2)
+    y2=int(image.shape[0]-y1)
+    return image[y1:y2, x1:x2]
+
 def qr_code_command_parser(image):
     if MARK_QR_CODES:
         image = display(image, VIDEOFEED.decodedObjects)
+
+    image = cropimage(image)
 
     for filter in ACTIVE_FILTERS:
         overlay = cv2.transform( image, filter.matrix )
@@ -88,16 +100,17 @@ def new_photo(request):
         filename = VIDEOFEED.snapshot(filename)
 
     media_file=os.path.join(TEMPDIR,filename)
-    photo = Photo.objects.create(media=media_file,edited_media=media_file)
+    photo = Photo.objects.create(media=media_file,edited_media=os.path.splitext(media_file)[0]+"_filtered_"+os.path.splitext(media_file)[1])
+
+    shutil.copyfile(photo.media,photo.edited_media)
+    image = cv2.imread(photo.edited_media)
+    image = cropimage(image)
     if len(ACTIVE_FILTERS)>0:
-        photo.edited_media = os.path.splitext(photo.media)[0]+"_filtered_"+os.path.splitext(photo.media)[1]
-        photo.save()
-        shutil.copyfile(photo.media,photo.edited_media)
-        image = cv2.imread(photo.edited_media)
         for filter in ACTIVE_FILTERS:
             overlay = cv2.transform( image, filter.matrix )
             image = cv2.addWeighted(overlay, filter.alpha, image, 1 - filter.alpha,0)
-        cv2.imwrite(photo.edited_media,image)
+
+    cv2.imwrite(photo.edited_media,image)
     response = redirect("photobooth_app:postproduction",id = photo.id)
     response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
     return response
@@ -174,6 +187,8 @@ class PostProduction(View):
         return render(request,'postproduction.html', {'image_path': path,'showbuttons':request.GET.get("showbuttons",SHOWBUTTONS)})
 
     def post(self,request,id):
+        VIDEOFEED.pending_qr_commands = []
+        VIDEOFEED.allowed_qr_commands=[]
         try:
             media = Media.objects.get(id=id)
         except:

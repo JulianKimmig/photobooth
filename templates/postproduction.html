@@ -52,12 +52,15 @@
                 if(data.opencommands[i] === "delete"){
                     $('#commandselection').val('delete');
                     $('form').submit();
+                    clearInterval(commandrequester);
                 }else if(data.opencommands[i] === "save"){
                     $('#commandselection').val('save');
                     $('form').submit();
-                }if(data.opencommands[i] === "print"){
+                    clearInterval(commandrequester);
+                }else if(data.opencommands[i] === "print"){
                     $('#commandselection').val('print');
                     $('form').submit();
+                    clearInterval(commandrequester);
                 }
             }
         })
