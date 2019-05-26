@@ -142,14 +142,14 @@ if not os.path.exists(TEMPDIR):
 
 
 
-USEPICAMERA = True
+USEPICAMERA = JCONFIG.get("settings","photobooth","use_pi_camera",default=True)
 if USEPICAMERA:
     try:
         from picamera import PiCamera
     except:
         print("CANNOT INITALIZE PICAMER")
         USEPICAMERA = False
-USEGPHOTO = True
+USEGPHOTO = JCONFIG.get("settings","photobooth","use_gphoto",default=True)
 if USEGPHOTO:
     try:
         from shutil import which
@@ -160,5 +160,6 @@ if USEGPHOTO:
     except:
         USEGPHOTO = False
 
-ALLOW_PRINTING = False
-SHOWBUTTONS=False
+ALLOW_PRINTING = JCONFIG.get("settings","photobooth","use_pi_camera",default=True)
+SHOWBUTTONS=JCONFIG.get("settings","photobooth","use_pi_camera",default=False)
+MARK_QR_CODES= JCONFIG.get("settings","photobooth","mark_qr_codes",default=False)

@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 
 
-from photobooth.settings import USEGPHOTO, TEMPDIR, STATICFILES_DIRS, ALLOW_PRINTING, SHOWBUTTONS
+from photobooth.settings import USEGPHOTO, TEMPDIR, STATICFILES_DIRS, ALLOW_PRINTING, SHOWBUTTONS, MARK_QR_CODES
 from photobooth_app.models import Photo, Media
 from photobooth_app.videocamera import VideoCamera
 
@@ -47,7 +47,8 @@ def display(im, decodedObjects):
     return im
 
 def qr_code_command_parser(image):
-#    image = display(image, VIDEOFEED.decodedObjects)
+    if MARK_QR_CODES:
+        image = display(image, VIDEOFEED.decodedObjects)
     return image
 
 

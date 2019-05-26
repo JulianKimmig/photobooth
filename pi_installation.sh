@@ -12,7 +12,7 @@ sudo apt upgrade -y
 
 sudo apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox chromium-browser -y
 
-sudo apt-get install python3 python3-pip python3-opencv git libcblas-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test gphoto2 libzbar0 -y
+sudo apt-get install python3 python3-pip python3-opencv git libcblas-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test gphoto2 libzbar0 libgstreamer1.0-0 xserver-xorg-legacy -y
 alias python=python3
 alias pip=pip3
 cd photobooth
@@ -21,39 +21,10 @@ pip3 install -r requirements.txt
 
 
 echo -e "xset s off\n xset s noblank\n xset -dpms\n setxkbmap -option terminate:ctrl_alt_bksp\n\n sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/' ~/.config/chromium/'Local State'\n sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type\":\"[^\"]\+\"/\"exit_type\":\"Normal\"/' ~/.config/chromium/Default/Preferences\n chromium-browser --disable-infobars --kiosk 'http://localhost:8000/'\n" | sudo tee /etc/xdg/openbox/autostart
-echo -e "if [[ -z \$DISPLAY ]] && [[ \$(tty) = /dev/tty1 ]]; then\n cd ~/photobooth\n sleep 5\n git pull\n python3 ~/photobooth/manage.py runserver 0.0.0.0:8000&\n sleep 5\n  ~/start_screen.sh&\n fi" > ~/.bash_profile
+echo -e "if [[ -z \$DISPLAY ]] && [[ \$(tty) = /dev/tty1 ]]; then\n cd ~/photobooth\n sleep 5\n git pull\n python3 ~/photobooth/manage.py runserver 0.0.0.0:8000&\n sleep 5\n ~/start_screen.sh&\nfi" > ~/.bash_profile
 echo -e "while [ \$(nc -w 1 localhost 8000 </dev/null; echo \$?) -gt 0 ];do\n echo 'wait for server to start'\n sleep 2\n done\n startx -- -nocursor" > ~/start_screen.sh
+chmod +x ~/start_screen.sh
 
 sudo usermod -a -G tty pi
 
-
-#sudo apt install openbox obconf obmenu midori -y
-#sudo apt-get --no-install-recommends install xserver-xorg xserver-xorg-video-fbdev xinit pciutils xinput xfonts-100dpi xfonts-75dpi xfonts-scalable -y
-#mkdir -p ~/.config/openbox && cp /etc/xdg/openbox/* ~/.config/openbox
-
-#echo "sleep 5s && midori  --inactivity-reset=300 -e Fullscreen -a 'http://localhost:8000/'" >> ~/.config/openbox/autostart
-
-#echo "/usr/bin/openbox-session">~/.xsession
-#
-#chmod +x ~/start_screen.sh
-
-#sudo raspi-config
-   # 3 boot-oprtion
-   # autologin to textconsole
-
-
-#picamera support
-#sudo nano /boot/config.txt
-#start_x=1             # essential
-#gpu_mem=128           # at least, or maybe more if you wish
-#disable_camera_led=0  # optional, if you don't want the led to glow
-
-
-#
-#sudo apt-get install xserver-xorg-legacy
-
-
-
-
-#sudo apt-get install --no-install-recommends chromium-browser
-#echo "@xset s noblank; @xset s off; @xset -dpms; chromium-browser --disable-infobars --kiosk 'http://localhost:8000/';" | sudo tee /etc/xdg/openbox/autostart
+echo -e "start_x=1\ngpu_mem=512\ndisable_camera_led=1" | sudo tee -a /boot/config.txt
