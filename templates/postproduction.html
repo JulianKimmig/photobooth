@@ -49,13 +49,13 @@
         $.getJSON(getUrl .protocol + "//" + getUrl.host + "/commands",function (data) {
             console.log(data);
             for(let i=0;i<data.opencommands.length;i++){
-                if(data.opencommands[i] === "Delete"){
+                if(data.opencommands[i] === "delete"){
                     $('#commandselection').val('delete');
                     $('form').submit();
-                }else if(data.opencommands[i] === "Save"){
+                }else if(data.opencommands[i] === "save"){
                     $('#commandselection').val('save');
                     $('form').submit();
-                }if(data.opencommands[i] === "Print"){
+                }if(data.opencommands[i] === "print"){
                     $('#commandselection').val('print');
                     $('form').submit();
                 }

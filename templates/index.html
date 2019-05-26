@@ -86,7 +86,7 @@ transform: translate(-50%, -50%);
         $.getJSON(getUrl .protocol + "//" + getUrl.host + "/commands",function (data) {
             for(let i=0;i<data.opencommands.length;i++){
                 console.log(data)
-                if(data.opencommands[i] === "Photo"){
+                if(data.opencommands[i] === "photo"){
                     $('#takephoto').click();
                     clearInterval(commandrequester);
                 }
