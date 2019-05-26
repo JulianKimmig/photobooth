@@ -12,7 +12,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 
 
-from photobooth.settings import USEGPHOTO, TEMPDIR, STATICFILES_DIRS, ALLOW_PRINTING, SHOWBUTTONS, MARK_QR_CODES
+from photobooth.settings import USEGPHOTO, TEMPDIR, STATICFILES_DIRS, ALLOW_PRINTING, SHOWBUTTONS, MARK_QR_CODES, \
+    JCONFIG
 from photobooth_app.models import Photo, Media
 from photobooth_app.videocamera import VideoCamera
 
@@ -50,10 +51,13 @@ def display(im, decodedObjects):
 ACTIVE_FILTERS=[]
 Filter = namedtuple('Filter',['name','matrix'])
 
+
 SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[ 0.393, 0.769, 0.189],
                                             [ 0.349, 0.686, 0.168],
                                             [ 0.272, 0.534, 0.131]
                                             ]))
+if "sepia" in JCONFIG.get("settings","photobooth","filters",default=[]):
+    ACTIVE_FILTERS.append(SEPIA_FILTER)
 
 def qr_code_command_parser(image):
     if MARK_QR_CODES:
