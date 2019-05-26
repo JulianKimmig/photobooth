@@ -211,7 +211,7 @@ class PostProduction(View):
             conn = cups.Connection()
             printers = conn.getPrinters ()
             if len(printers)>0:
-                printer_name=list(printers.keys())[0][0]
+                printer_name=list(printers.keys())[0]
                 conn.printFile (printer_name, media.edited_media, "Photobooth Image", {})
 
 
