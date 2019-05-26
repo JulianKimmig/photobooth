@@ -192,6 +192,8 @@ class PostProduction(View):
 
         action = request.POST.get('action',)
         if action == 'save' or action == 'print':
+            try: VIDEOFEED.pending_qr_commands.remove('save')
+            except:pass
             newdir = os.path.join(STATICFILES_DIRS[0],"media",os.path.basename(media.media))
             shutil.move(media.media,newdir)
             media.media = newdir
@@ -203,10 +205,13 @@ class PostProduction(View):
             media.save()
 
         if action == 'print':
+            try: VIDEOFEED.pending_qr_commands.remove('print')
+            except:pass
+
             conn = cups.Connection()
             printers = conn.getPrinters ()
             if len(printers)>0:
-                printer_name=printers.keys()[0]
+                printer_name=list(printers.keys())[0][0]
                 conn.printFile (printer_name, media.edited_media, "Photobooth Image", {})
 
 
