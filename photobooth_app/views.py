@@ -6,6 +6,7 @@ import os
 
 import shutil
 import subprocess
+from collections import namedtuple
 from django.http import StreamingHttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
@@ -46,9 +47,20 @@ def display(im, decodedObjects):
             cv2.line(im, hull[j], hull[ (j+1) % n], (255,0,0),)
     return im
 
+ACTIVE_FILTERS=[]
+Filter = namedtuple('Filter',['name','matrix'])
+
+SEPIA_FILTER=Filter(name='sepia',matrix=np.matrix([[ 0.393, 0.769, 0.189],
+                                            [ 0.349, 0.686, 0.168],
+                                            [ 0.272, 0.534, 0.131]
+                                            ]))
+
 def qr_code_command_parser(image):
     if MARK_QR_CODES:
         image = display(image, VIDEOFEED.decodedObjects)
+
+    for filter in ACTIVE_FILTERS:
+        image = cv2.transform( image, filter.matrix )
     return image
 
 
