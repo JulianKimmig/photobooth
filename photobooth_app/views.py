@@ -100,6 +100,10 @@ def new_photo(request):
         filename = VIDEOFEED.snapshot(filename)
 
     media_file=os.path.join(TEMPDIR,filename)
+    if not os.path.exists(media_file):
+        response =  redirect('photobooth_app:index')
+        response['Location'] += '?'+'&'.join([str(key)+"="+str(value) for key,value in request.GET.items()])
+        return response
     photo = Photo.objects.create(media=media_file,edited_media=os.path.splitext(media_file)[0]+"_filtered_"+os.path.splitext(media_file)[1])
 
     shutil.copyfile(photo.media,photo.edited_media)
