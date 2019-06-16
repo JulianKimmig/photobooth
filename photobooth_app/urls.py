@@ -22,8 +22,8 @@ urlpatterns = [
     path('index', views.index,name="index"),
     path('takephoto', views.new_photo),
     path('recordvideo', views.recordvideo),
-   # path("video_feed", views.video_feed, name="video_feed"),
-   # path("files", views.file_list, name="file_list"),
-   # path("commands", views.commands, name="commands"),
-   # path("postproduction/<int:id>", views.PostProduction.as_view(), name="postproduction"),
+    path("video_feed", views.video_feed, name="video_feed"),
+    path("files", views.file_list, name="file_list"),
+    path("commands", views.commands, name="commands"),
+    path("postproduction/<int:id>", views.PostProduction.as_view(), name="postproduction"),
 ]
