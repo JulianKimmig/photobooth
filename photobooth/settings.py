@@ -142,7 +142,7 @@ if not os.path.exists(TEMPDIR):
 
 
 
-USEPICAMERA = JCONFIG.get("settings","photobooth","use_pi_camera",default=True)
+USEPICAMERA = JCONFIG.get("settings","photobooth","use_pi_camera",default=False)
 if USEPICAMERA:
     try:
         from picamera import PiCamera
