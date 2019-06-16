@@ -160,7 +160,7 @@ if USEGPHOTO:
     except:
         USEGPHOTO = False
 
-ALLOW_PRINTING = JCONFIG.get("settings","photobooth","use_pi_camera",default=True)
+ALLOW_PRINTING = JCONFIG.get("settings","photobooth","allow_printing",default=True)
 SHOWBUTTONS=JCONFIG.get("settings","photobooth","show_buttons"
                                                 "",default=False)
 MARK_QR_CODES= JCONFIG.get("settings","photobooth","mark_qr_codes",default=False)
