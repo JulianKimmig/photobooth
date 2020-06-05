@@ -1,6 +1,6 @@
 chardet==2.3.0
 cryptography==1.7.1
-Django==2.2.1
+Django==2.2.13
 idna==2.2
 Json-Dict==0.2.1553757973
 keyring==10.1
